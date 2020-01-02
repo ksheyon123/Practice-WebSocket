@@ -1,18 +1,19 @@
 const WebSocket = require('ws');
 
 module.exports = (server) => {
-    const wss = new WebSocket(server);
-
+    const wss = new WebSocket.Server({server});
+    console.log(wss)
     wss.on('connection', (ws, req) => {
+        console.log('hi')
         const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        console.log('새로운 클라이언트 접속');
+        console.log('새로운 클라이언트 접속', ip);
 
         ws.on('message', (message) => {
-            console.log(message);
+            console.log('WebSocket Message', message);
         });
 
         ws.on('error', (err) => {
-            console.log(error);
+            console.log('WebSocket Err', error);
         });
 
         ws.on('close', () => {

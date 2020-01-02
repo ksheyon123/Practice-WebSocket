@@ -12,7 +12,7 @@ const webSocket = require('./socket');
 const app = express();
 
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 app.set('port', process.env.PORT || '8005');
 
 app.use(morgan('dev'));
@@ -40,15 +40,15 @@ app.use((req, res, next) => {
     next(err);
 });
 
-app.use((err, req, res, next) => {
-    res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-    res.status(err.status || 500);
-    res.render('error');
-});
+// app.use((err, req, res, next) => {
+//     res.locals.message = err.message;
+//     res.locals.error = req.app.get('env') === 'development' ? err : {};
+//     res.status(err.status || 500);
+//     res.render('error');
+// });
 
-app.listen(app.get('port'), () => {
+var server = app.listen(app.get('port'), () => {
     console.log(app.get('port'), '번 포트에서 대기 중');
 });
-
-webSocket('ws://localhost:8005');
+// console.log(app)
+webSocket(server);
