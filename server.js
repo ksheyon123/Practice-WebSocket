@@ -27,6 +27,7 @@ var server = app.listen(3000, '192.168.0.40',  function() {
 
 var io = socketio.listen(server);
 
+var login_ids= {};
 // WebSocket(io);
 //클라이언트가 연결했을 때의 이벤트 처리
 io.sockets.on('connection', function(socket) {
@@ -55,7 +56,7 @@ io.sockets.on('connection', function(socket) {
         }
     });
 
-    var login_ids= {};
+    
     socket.on('login', (login) => {
         console.log('login 이벤트를 받았습니다.');
         console.dir(login);
@@ -69,6 +70,7 @@ io.sockets.on('connection', function(socket) {
 
         sendResponse(socket, 'login', '200', '로그인되었습니다.');
     });
+    console.log('outer', login_ids);
 
     function sendResponse(socket, command, code, message) {
         var statusObj = {command: command, code: code, message: message};
