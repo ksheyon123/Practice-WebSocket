@@ -17,6 +17,12 @@
         <input type='text' id='portInput' value='3000'>
         <input type='button' id='connectButton' value='연결하기'>
     </div>
+    <br>
+    <div>
+        <input type='button' id='joinRoomButton' value='방 입장하기'>
+        <input type='button' id='leaveRoomButton' value='방 나가기'>
+    </div>
+    <br>
     <div>
         <div>
             <span>보내는 사람 아이디 :</span>
@@ -26,6 +32,11 @@
             <span>받는 사람 아이디 :</span>
             <input type='text' id='recepientInput' value='ALL'>
         </div>
+        <!-- command 선택 <select> 채팅, 그룹 채팅-->
+            <select name='chattype' id='chattype'>
+                <option value='chat'>채팅</option>
+                <option value='groupchat'>그룹 채팅</option>
+            </select>
         <div>
             <span>메시지 데이터 : </span>
             <input type='text' id='dataInput' value='안녕!'>
@@ -85,11 +96,14 @@
     });
 
     $('#sendButton').bind('click', (event) => {
+        //chattype 구별
+        var chattype = document.getElementById('chattype').value;
+        
         var sender = document.getElementById('senderInput').value;
         var recepient = document.getElementById('recepientInput').value;
         var data = document.getElementById('dataInput').value;
 
-        var output = { sender: sender, recepient: recepient, command: 'chat', type: 'text', data: data };
+        var output = { sender: sender, recepient: recepient, command: chattype, type: 'text', data: data };
         console.log('서버로 보낼 데이터 : ' + JSON.stringify(output));
 
         if (socket == undefined) {
@@ -157,6 +171,34 @@
 
         if(socket == undefined) {
             alert('서버에 연결되어 있지 않습니다. 먼저 서버에 연결하세요. ');
+            return;
+        }
+
+        socket.emit('room', output);
+    });
+
+    $('#joinRoomButton').bind('click', (event) => {
+        var roomId = document.getElementById('roomIdInput').value;
+
+        var output = {command: 'join', roomId: roomId }
+        console.log('서버로 보낼 데이터 : ' + JSON.stringify(output));
+
+        if(socket == undefined) {
+            alert('서버에 연결되어 있지 않습니다. 먼저 서버에 연결하세요. ');
+            return;
+        }
+
+        socket.emit('room', output);
+    });
+
+    $('#leaveRoomButton').bind('click', (event) => {
+        var roomId = document.getElementById('roomIdInput').value;
+
+        var output = { command: 'leave', roomId: roomId };
+        console.log('서버로 보낼 데이터 : ' + JSON.stringify(output));
+
+        if(socket == undefined) {
+            alert('서버에 연결되어 있지 않습니다. 먼저 서버에 연결하세요.')
             return;
         }
 
