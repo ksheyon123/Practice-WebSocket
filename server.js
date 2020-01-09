@@ -71,4 +71,84 @@ io.sockets.on('connection', (socket) => {
         socket.emit('response', statusObj);
     }
     
+    socket.on('room', (room) => {
+        console.log('room 이벤트를 받았습니다.');
+        console.dir(room);
+
+        if(room.command == 'create') {
+            if(io.sockets.adapter.rooms[room.roomId]) {
+                console.log('방이 이미 만들어져 있습니다.');
+
+            } else {
+                console.log('방을 새로 만듭니다.');
+
+                socket.join(room.roomId);
+
+                var curRoom = io.sockets.adapter.rooms[room.roomId];
+                console.log('curRoom', curRoom);
+                curRoom.id = room.roomId;
+                curRoom.name = room.roomName;
+                curRoom.owner = room.roomOwner;
+            }
+        } else if (room.command == 'update') {
+            
+            if(io.sockets.adapter.rooms[room.roomId]) {
+                var curRoom = io.sockets.adapter.rooms[room.roomId];
+                curRoom.id = room.roomId;
+                curRoom.name = room.roomName;
+                curRoom.owner = room.roomOwner;
+            } else {
+                console.log('방이 만들어져 있지 않습니다.')
+            }
+        } else if (room.command == 'delete') {
+            socket.leave(room.roomId);
+
+            if(io.sockets.adapter.rooms[room.roomId]) {
+                delete io.sockets.adapter.rooms[room.roomId];
+            } else {
+                console.log('방이 만들어져 있지 않습니다.');
+            }
+        }
+
+        var roomList = getRoomList();
+
+        var output = { command: 'list', rooms: roomList };
+        console.log('클라이언트로 보낼 데이터 : ' + JSON.stringify(output));
+
+        io.sockets.emit('room', output);
+    });
+
+    getRoomList = () => {
+        console.dir(io.sockets.adapter.rooms);
+
+        var roomList = [];
+
+        Object.keys(io.sockets.adapter.rooms).forEach((roomId) => {
+            console.log('current room id : ' + roomId);
+            var outRoom = io.sockets.adapter.rooms[roomId];
+
+            var foundDefault = false;
+            var index = 0;
+
+            Object.keys(outRoom.sockets).forEach((key) => {
+                console.log('#' + index + ' : ' + key + ', ' + outRoom.sockets[key]);
+
+                if(roomId == key) {
+                    foundDefault = true;
+                    console.log('this is default room.');
+                }
+
+                index++;
+            });
+
+            if(!foundDefault) {
+                roomList.push(outRoom);
+            }
+        });
+
+        console.log('[ROOM LIST]');
+        console.dir(roomList);
+
+        return roomList;
+    }
 });
